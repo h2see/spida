@@ -1,7 +1,7 @@
 # Spida: Stable Diffusion API Wrapper for Automatic1111 WebUI
 
 [![PyPI Version](https://img.shields.io/pypi/v/spida.svg)](https://pypi.org/project/spida/)
-[![License](https://img.shields.io/pypi/l/spida.svg)](https://github.com/h2see/spida/LICENSE)
+[![License](https://img.shields.io/pypi/l/spida.svg)](https://github.com/h2see/spida/blob/master/LICENSE)
 
 Spida is a Python package that serves as a wrapper for the Stable Diffusion API provided by the Automatic1111 WebUI. It simplifies the usage of the Stable Diffusion model for generating AI-generated images from text prompts. Spida also includes support for the ControlNet extension, allowing users to condition the generation process using ControlNet modules. Spida is an anagram of SDAPI (Stable Diffusion API).
 
@@ -177,4 +177,4 @@ spida.txt2img("text_prompt", cnet_settings=settings)
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/h2see/spida/LICENSE).
+This project is licensed under the [MIT License](https://github.com/h2see/spida/blob/master/LICENSE).
