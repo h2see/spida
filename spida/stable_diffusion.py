@@ -1,18 +1,37 @@
 import json
-from json.decoder import JSONDecodeError
 import numpy as np
+import importlib.resources as impr
 import os
 import pprint
 
 from . import utils
 
-# LOAD CONFIG
-with open(os.path.join(os.path.dirname(__file__), "config.json"), "a+") as f:
-    try:
-        config = json.load(f)
-    except JSONDecodeError:
-        print("Running first use configuration...\n")
-        config = {}
+# initialize config variable
+config = {}
+
+# get config.json path
+with impr.as_file(impr.files("spida").joinpath("data")) as data_path:
+    config_path = data_path.joinpath("config.json")
+
+
+def set_config(config_dict: dict = None):
+    """
+    Configures Spida.
+
+    By default prompts the user to input configuration settings via the terminal,
+    but will use config_dict instead if specified.
+
+    Parameters
+    ----------
+    config_dict : dict
+        A dictionary of configuration settings for Spida, by default None.
+
+    Returns
+    -------
+    None
+        This function does not return a value; it changes Spida's config.json file.
+    """
+    if config_dict is None:
         config["fail_message"] = "Local server not running, starting..."
         config["webui_path"] = input(
             "Please input Stable Diffusion WebUI folder path\n"
@@ -28,9 +47,18 @@ with open(os.path.join(os.path.dirname(__file__), "config.json"), "a+") as f:
         )
         config["url"] = url if url else "http://127.0.0.1:7860"
         print()
-        f.seek(0)
-        f.write(json.dumps(config))
-        f.truncate()
+    else:
+        config.update(config_dict)
+    with open(config_path, "w") as f:
+        json.dump(config, f)
+
+
+with open(config_path, "r") as f:
+    config.update(json.load(f))
+    if not config:
+        print("Running one time configuration...\n")
+        set_config()
+        print("One time configuration complete!\n")
 
 
 # PRIMARY FUNCTIONS

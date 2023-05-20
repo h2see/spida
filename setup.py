@@ -7,6 +7,7 @@ setup(
     name="spida",
     version="0.1",
     packages=find_packages(),
+    include_package_data=True,
     license="MIT",
     description="A Stable Diffusion API Wrapper for AUTOMATIC1111/stable-diffusion-webui",
     long_description=open("README.md").read(),
