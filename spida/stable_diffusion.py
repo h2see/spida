@@ -211,9 +211,10 @@ def txt2img(
     r = response.json()
     if verbose:
         pprint.pprint(r["parameters"])
-    size = (len(r["images"]), shape[0], shape[1], 3)
+    dsts_b64strs = r["images"]
+    size = (len(dsts_b64strs), shape[0], shape[1], 3)
     dsts = np.empty(shape=size, dtype=np.uint8)
-    for i, v in enumerate(r["images"]):
+    for i, v in enumerate(dsts_b64strs):
         dsts[i] = utils.img.b64str2img(v)
     return dsts
 
@@ -267,8 +268,12 @@ def annotate(
         fail_message=config["fail_message"],
     )
     r = response.json()
-    dsts = np.empty(shape=imgs.shape[:-1], dtype=imgs.dtype)
-    for i, v in enumerate(r["images"]):
+    dsts_b64strs = r["images"]
+    dst = utils.img.b64str2img(dsts_b64strs[0])
+    size = (len(dsts_b64strs), *dst.shape)
+    dsts = np.empty(shape=size, dtype=dst.dtype)
+    dsts[0] = dst
+    for i, v in enumerate(dsts_b64strs[1:], start=1):
         dsts[i] = utils.img.b64str2img(v)
     return dsts
 
