@@ -335,7 +335,7 @@ def cnet_settings(
     else:
         annotator_res = annotator
     if model is None:
-        model = search_cnet_models(annotator)[0]
+        model = search_cnet_models(annotator_res)[0]
     if resolution is None:
         resolution = min(annotated_img.shape[:2])
     if mask is None:

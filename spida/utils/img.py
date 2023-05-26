@@ -1,12 +1,11 @@
 import io
+import glob
 import base64
 from PIL import Image
 from matplotlib import pyplot as plt
 import math
 import numpy as np
 from tkinter import Tk, filedialog
-
-from . import misc
 
 Tk().withdraw()
 
@@ -51,10 +50,11 @@ def save(img: np.ndarray, file_name: str = None):
         The filename of the output file. If None, a file name will be automatically generated. Default is None.
     """
     if file_name is None:
-        png_files = [i for i in misc.get_cwd_files() if i.endswith(".png")]
+        png_files = glob.glob("img_*.png")
         if png_files:
-            img_num = int(png_files[-1].split(".")[0].split("_")[-1])
-            file_name = f"img_{img_num+1}.png"
+            nums = [int(i[4:-4]) for i in png_files]
+            fnum = max(nums) + 1
+            file_name = f"img_{fnum}.png"
         else:
             file_name = "img_0.png"
     Image.fromarray(img).save(file_name)

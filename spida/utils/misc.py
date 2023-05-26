@@ -1,5 +1,4 @@
 from difflib import SequenceMatcher
-import os
 
 
 def search(query: str, lst: list, match_case=True):
@@ -29,7 +28,3 @@ def search(query: str, lst: list, match_case=True):
     else:
         sims = [SequenceMatcher(None, query, i).ratio() for i in lst]
     return [i for _, i in sorted(zip(sims, lst), reverse=True)]
-
-
-def get_cwd_files():
-    return [f for f in os.listdir(os.getcwd()) if os.path.isfile(f)]
