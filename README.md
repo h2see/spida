@@ -23,15 +23,20 @@ pip install spida
 
 ### Quick Start
 
-The following code demonstrates a basic call to the `txt2img()` function. The code uses the prompt `"cow"` returns a numpy image array, `imgs`. Only one image is created, so `imgs[0]` is used to retrieve it. The image is then displayed using the `show()` function.
+To use Spida in your python project, import it as shown here:
 
 ```python
 import spida
+```
+
+The following code demonstrates a basic call to the `txt2img()` function. The code uses the prompt `"cow"` returns a numpy image array, `imgs`. Only one image is created, so `imgs[0]` is used to retrieve it. The image is then displayed using the `show()` function.
+
+```python
 imgs = spida.txt2img("cow")
 spida.show(imgs[0])
 ```
 
-For ControlNet functionality see: [Example](#using-controlnet-in-txt2img)
+For ControlNet functionality jump to: [Example](#using-controlnet-in-txt2img)
 
 ### Starting the Local API
 
@@ -155,6 +160,7 @@ spida.show(img_grid)
 
 ```python
 import spida
+import numpy as np
 
 # Start the local API
 spida.start()
@@ -162,17 +168,21 @@ spida.start()
 # Set the Stable Diffusion model
 spida.model("model_name")
 
-# Get image to annotate
-image = spida.open()
+# Create an image to annotate
+imgs = spida.txt2img("chair")
 
-# Annotate an image using a ControlNet module
-annotated_images = spida.annotate([image], annotator="controlnet_module")
+# Annotate the image using ControlNet
+depth = spida.annotate(imgs, annotator="depth")[0]
 
 # Generate the settings for a ControlNet unit
-settings = spida.cnet_settings(annotated_images[0], annotator="controlnet_module")
+cset = spida.cnet_settings(depth, annotator="depth")
 
 # Use the settings for conditioning the generation process
-spida.txt2img("text_prompt", cnet_settings=settings)
+results = spida.txt2img("chair", cnet_settings=cset)
+
+# Create and display a grid showing each step of the process
+grid = spida.grid_img(np.array([imgs[0], spida.gray2rgb(depth), results[0]]), (1, None))
+spida.show(grid)
 ```
 
 ## License
