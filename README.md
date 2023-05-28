@@ -74,13 +74,7 @@ Spida supports the ControlNet extension, which allows for conditioning the gener
 annotated_images = spida.annotate(images, annotator="controlnet_module")
 ```
 
-The `controlnet_module` parameter should be the name of the ControlNet module to be used for annotation. An `annotated_image` from `annotated_images` can be passed into the ControlNet unit settings using the `cnet_settings()` function:
-
-```python
-cnet_sets = spida.cnet_settings(annotated_image, annotator="controlnet_module")
-```
-
-This function returns a dictionary containing the settings for a ControlNet unit. You can customize various parameters such as the model, weight, resolution, thresholds, control mode, resize mode, and more. Now, if you set the `cnet_settings` parameter in `txt2img()` to `cnet_sets`, the image generation process will be conditioned by the ControlNet.
+The `controlnet_module` parameter should be the name of the ControlNet module to be used for annotation.
 
 ### Retrieving Info
 
@@ -171,17 +165,14 @@ spida.model("model_name")
 # Create an image to annotate
 imgs = spida.txt2img("chair")
 
-# Annotate the image using ControlNet
-depth = spida.annotate(imgs, annotator="depth")[0]
-
 # Generate the settings for a ControlNet unit
-cset = spida.cnet_settings(depth, annotator="depth")
+cset = spida.cnet_settings(imgs[0])
 
 # Use the settings for conditioning the generation process
 results = spida.txt2img("chair", cnet_settings=cset)
 
 # Create and display a grid showing each step of the process
-grid = spida.grid_img(np.array([imgs[0], spida.gray2rgb(depth), results[0]]), (1, None))
+grid = spida.grid_img(np.array([imgs[0], results[1], results[0]]), (1, None))
 spida.show(grid)
 ```
 

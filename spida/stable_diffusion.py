@@ -279,7 +279,7 @@ def annotate(
 
 
 def cnet_settings(
-    annotated_img: np.ndarray,
+    img: np.ndarray,
     annotator: str = "depth",
     model: str = None,
     weight: float = 1.0,
@@ -298,10 +298,10 @@ def cnet_settings(
 
     Parameters
     ----------
-    annotated_img : numpy.ndarray
-        Annotated image to be used as input for the ControlNet unit.
+    img : numpy.ndarray
+        Image to be used as input for the ControlNet unit.
     annotator : str, optional
-        Preprocessor to use on the input image. Defaults to "depth".
+        The ControlNet module used for the annotation. Defaults to "depth".
     model : str, optional
         Name of the model to use for conditioning in the unit. If not specified, searches for the appropriate model.
     weight : float, optional
@@ -330,24 +330,37 @@ def cnet_settings(
     dict
         A dictionary containing the settings for a ControlNet unit.
     """
-    if search:
-        annotator_res = search_annotators(annotator)[0]
+    if annotator is not None:
+        if search:
+            annotator_res = search_annotators(annotator)[0]
+        else:
+            annotator_res = annotator
     else:
-        annotator_res = annotator
-    if model is None:
-        model = search_cnet_models(annotator_res)[0]
+        annotator_res = None
+
+    if model is not None:
+        if search:
+            model_res = search_cnet_models(model)[0]
+        else:
+            model_res = model
+    else:
+        if annotator_res is not None:
+            model_res = search_cnet_models(annotator_res)[0]
+        else:
+            model_res = search_cnet_models("depth")[0]
+
     if resolution is None:
-        resolution = min(annotated_img.shape[:2])
+        resolution = min(img.shape[:2])
     if mask is None:
         mask_b64str = None
     else:
         mask_b64str = utils.img.img2b64str(mask)
-    input_b64str = utils.img.img2b64str(annotated_img)
+    input_b64str = utils.img.img2b64str(img)
     return {
         "input_image": input_b64str,
         "mask": mask_b64str,
         "module": annotator_res,
-        "model": model,
+        "model": model_res,
         "weight": weight,
         "resize_mode": resize_mode,
         "lowvram": lowvram,
