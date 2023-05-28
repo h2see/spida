@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="spida",
-    version="0.2.4",
+    version="0.2.5",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",
