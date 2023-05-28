@@ -3,6 +3,10 @@ from requests.exceptions import ConnectionError
 import time
 
 
+class BadResponse(Exception):
+    pass
+
+
 def request(
     type=requests.get,
     fail_action=None,
@@ -14,8 +18,12 @@ def request(
     do_fail_action = True
     for i in range(retry_max):
         try:
-            return type(**kwargs)
-        except ConnectionError:
+            response = type(**kwargs)
+            if response.status_code is 200:
+                return response
+            else:
+                raise BadResponse("Status is not 200")
+        except (ConnectionError, BadResponse) as error:
             if do_fail_action:
                 if fail_message is not None:
                     print(fail_message)
