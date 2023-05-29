@@ -1,16 +1,19 @@
 import json
 import numpy as np
-import importlib.resources as impr
+import importlib.resources as impres
 import os
+import sys
+import subprocess
 import pprint
 
 from . import utils
 
-# initialize config variable
+# initialize variables
 config = {}
+webui_process = None
 
 # get config.json path
-with impr.as_file(impr.files("spida").joinpath("data")) as data_path:
+with impres.as_file(impres.files("spida").joinpath("data")) as data_path:
     config_path = data_path.joinpath("config.json")
 
 
@@ -78,8 +81,38 @@ def start():
     """
     cwd = os.getcwd()
     os.chdir(config["webui_path"])
-    os.startfile(config["webui_startfile"])
+    if sys.platform == "win32":
+        os.startfile(config["webui_startfile"])
+    else:
+        global webui_process
+        webui_process = subprocess.Popen(config["webui_startfile"])
     os.chdir(cwd)
+
+
+def stop(shell=False):
+    """
+    Stops the local API. On Windows, kills all cmd or powershell terminals.
+
+    Parameters
+    ----------
+    shell : bool, optional
+        Whether to kill powershell terminals instead of cmd terminals, by default False.
+
+    Returns
+    -------
+    None
+        This function does not return a value; it stops the local API.
+    """
+    if sys.platform == "win32":
+        if shell:
+            os.system("taskkill /f /im powershell.exe")
+        else:
+            os.system("taskkill /f /im cmd.exe")
+    else:
+        if webui_process is None:
+            raise Exception("Could not find process id.")
+        else:
+            webui_process.terminate()
 
 
 def model(name: str, search: bool = True):
