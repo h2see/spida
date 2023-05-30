@@ -16,6 +16,7 @@ class NoneProcessError(Exception):
 # initialize global variables
 config = {}
 webui_process = None
+webui_started = False
 request_fail_message = "Local server not running, starting..."
 
 # get config.json path
@@ -55,12 +56,12 @@ def set_config(config_dict: dict = None):
         )
         config["url"] = url if url else "http://127.0.0.1:7860"
         use_subprocess = input(
-            "\nWould you like to start the Stable Diffusion WebUI using subprocess? [y/n]\n(ENTER defaults to y)\n"
+            "\nWould you like to start the Stable Diffusion WebUI using subprocess? [y/n]\n(if possible, ENTER defaults to n)\n"
         )
         config["use_subprocess"] = (
             False
-            if (use_subprocess.lower() if use_subprocess else "y") is "n"
-            and sys.platform is "win32"
+            if (use_subprocess.lower() if use_subprocess else "n") == "n"
+            and sys.platform == "win32"
             else True
         )
         print()
@@ -93,19 +94,23 @@ def start():
     None
         This function does not return a value; it initiates the local API.
     """
-    if config["use_subprocess"]:
-        global webui_process
-        webui_process = subprocess.Popen(
-            config["webui_path"] + "/" + config["webui_startfile"],
-            cwd=config["webui_path"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-    else:
-        cwd = os.getcwd()
-        os.chdir(config["webui_path"])
-        os.startfile(config["webui_startfile"])
-        os.chdir(cwd)
+    if not webui_started:
+        if config["use_subprocess"]:
+            global webui_process
+            webui_process = subprocess.Popen(
+                config["webui_path"] + "/" + config["webui_startfile"],
+                cwd=config["webui_path"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        else:
+            cwd = os.getcwd()
+            os.chdir(config["webui_path"])
+            os.startfile(config["webui_startfile"])
+            os.chdir(cwd)
+
+        global webui_started
+        webui_started = True
 
 
 def stop(shell=False):
@@ -124,7 +129,7 @@ def stop(shell=False):
     """
     if config["use_subprocess"]:
         if webui_process is None:
-            raise NoneProcessError("Could not find subprocess, webui must be running.")
+            raise NoneProcessError("Could not find subprocess.")
         else:
             if webui_process.poll() is None:
                 webui_process.terminate()
@@ -135,6 +140,9 @@ def stop(shell=False):
             os.system("taskkill /f /im powershell.exe")
         else:
             os.system("taskkill /f /im cmd.exe")
+
+    global webui_started
+    webui_started = False
 
 
 def print_webui_console():
@@ -148,10 +156,10 @@ def print_webui_console():
     """
     if config["use_subprocess"]:
         if webui_process is None:
-            raise NoneProcessError("Could not find subprocess, webui must be running.")
+            raise NoneProcessError("Could not find subprocess.")
         else:
-            stdout, stderr = webui_process.communicate()
-            print(stdout.read())
+            for line in webui_process.stdout:
+                print(line.decode().strip())
     else:
         print("Webui must be running as subprocess to use this function.")
 
