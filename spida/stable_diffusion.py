@@ -49,6 +49,15 @@ def set_config(config_dict: dict = None):
             "\nPlease input API url\n(if ENTER defaults to http://127.0.0.1:7860)\n"
         )
         config["url"] = url if url else "http://127.0.0.1:7860"
+        use_subprocess = input(
+            "\nWould you like to start the Stable Diffusion WebUI using subprocess? [y/n]\n(if possible, ENTER defaults to n)\n"
+        )
+        config["use_subprocess"] = (
+            False
+            if (use_subprocess.lower() if use_subprocess else "n") is "n"
+            and sys.platform is "win32"
+            else True
+        )
         print()
     else:
         config.update(config_dict)
@@ -71,7 +80,7 @@ def start():
     """
     Starts the local API by running the specified start file from the configuration.
 
-    Changes the current working directory to the path specified in the configuration,
+    If not using subprocess: Changes the current working directory to the path specified in the configuration,
     starts the file specified in the configuration, and then changes back to the original directory.
 
     Returns
@@ -79,19 +88,22 @@ def start():
     None
         This function does not return a value; it initiates the local API.
     """
-    cwd = os.getcwd()
-    os.chdir(config["webui_path"])
-    if sys.platform == "win32":
-        os.startfile(config["webui_startfile"])
-    else:
+    if config["use_subprocess"]:
         global webui_process
-        webui_process = subprocess.Popen(config["webui_startfile"])
-    os.chdir(cwd)
+        webui_process = subprocess.Popen(
+            config["webui_path"] + "/" + config["webui_startfile"],
+            cwd=config["webui_path"],
+        )
+    else:
+        cwd = os.getcwd()
+        os.chdir(config["webui_path"])
+        os.startfile(config["webui_startfile"])
+        os.chdir(cwd)
 
 
 def stop(shell=False):
     """
-    Stops the local API. On Windows, kills all cmd or powershell terminals.
+    Stops the local API. If not a subprocess, kills all cmd or powershell terminals.
 
     Parameters
     ----------
@@ -103,16 +115,16 @@ def stop(shell=False):
     None
         This function does not return a value; it stops the local API.
     """
-    if sys.platform == "win32":
-        if shell:
-            os.system("taskkill /f /im powershell.exe")
-        else:
-            os.system("taskkill /f /im cmd.exe")
-    else:
+    if config["use_subprocess"]:
         if webui_process is None:
             raise Exception("Could not find process id.")
         else:
             webui_process.terminate()
+    else:
+        if shell:
+            os.system("taskkill /f /im powershell.exe")
+        else:
+            os.system("taskkill /f /im cmd.exe")
 
 
 def model(name: str, search: bool = True):
