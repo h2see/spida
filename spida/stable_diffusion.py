@@ -8,9 +8,10 @@ import pprint
 
 from . import utils
 
-# initialize variables
+# initialize global variables
 config = {}
 webui_process = None
+request_fail_message = "Local server not running, starting..."
 
 # get config.json path
 with impres.as_file(impres.files("spida").joinpath("data")) as data_path:
@@ -35,7 +36,6 @@ def set_config(config_dict: dict = None):
         This function does not return a value; it changes Spida's config.json file.
     """
     if config_dict is None:
-        config["fail_message"] = "Local server not running, starting..."
         config["webui_path"] = input(
             "Please input Stable Diffusion WebUI folder path\n"
         )
@@ -152,7 +152,7 @@ def model(name: str, search: bool = True):
         url=f'{config["url"]}/sdapi/v1/options',
         json=option_payload,
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
 
 
@@ -251,7 +251,7 @@ def txt2img(
         url=f'{config["url"]}/sdapi/v1/txt2img',
         json=payload,
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     if verbose:
@@ -310,7 +310,7 @@ def annotate(
         url=f'{config["url"]}/controlnet/detect',
         json=payload,
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     dsts_b64strs = r["images"]
@@ -433,7 +433,7 @@ def get_models():
     response = utils.net.get(
         url=f'{config["url"]}/sdapi/v1/sd-models',
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     return sorted([i["title"] for i in r])
@@ -468,7 +468,7 @@ def get_samplers():
     response = utils.net.get(
         url=f'{config["url"]}/sdapi/v1/samplers',
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     return sorted([i["name"] for i in r])
@@ -503,7 +503,7 @@ def get_styles():
     response = utils.net.get(
         url=f'{config["url"]}/sdapi/v1/prompt-styles',
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     return sorted([i["name"] for i in r])
@@ -538,7 +538,7 @@ def get_annotators():
     response = utils.net.get(
         url=f'{config["url"]}/controlnet/module_list',
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     return sorted(r["module_list"])
@@ -573,7 +573,7 @@ def get_cnet_models():
     response = utils.net.get(
         url=f'{config["url"]}/controlnet/model_list',
         fail_action=start,
-        fail_message=config["fail_message"],
+        fail_message=request_fail_message,
     )
     r = response.json()
     return sorted(r["model_list"])
