@@ -8,6 +8,11 @@ import pprint
 
 from . import utils
 
+
+class NoneProcessError(Exception):
+    pass
+
+
 # initialize global variables
 config = {}
 webui_process = None
@@ -50,11 +55,11 @@ def set_config(config_dict: dict = None):
         )
         config["url"] = url if url else "http://127.0.0.1:7860"
         use_subprocess = input(
-            "\nWould you like to start the Stable Diffusion WebUI using subprocess? [y/n]\n(if possible, ENTER defaults to n)\n"
+            "\nWould you like to start the Stable Diffusion WebUI using subprocess? [y/n]\n(ENTER defaults to y)\n"
         )
         config["use_subprocess"] = (
             False
-            if (use_subprocess.lower() if use_subprocess else "n") is "n"
+            if (use_subprocess.lower() if use_subprocess else "y") is "n"
             and sys.platform is "win32"
             else True
         )
@@ -93,6 +98,8 @@ def start():
         webui_process = subprocess.Popen(
             config["webui_path"] + "/" + config["webui_startfile"],
             cwd=config["webui_path"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
     else:
         cwd = os.getcwd()
@@ -117,14 +124,36 @@ def stop(shell=False):
     """
     if config["use_subprocess"]:
         if webui_process is None:
-            raise Exception("Could not find process id.")
+            raise NoneProcessError("Could not find subprocess, webui must be running.")
         else:
-            webui_process.terminate()
+            if webui_process.poll() is None:
+                webui_process.terminate()
+            else:
+                print("Process is already stopped.")
     else:
         if shell:
             os.system("taskkill /f /im powershell.exe")
         else:
             os.system("taskkill /f /im cmd.exe")
+
+
+def print_webui_console():
+    """
+    Prints the standard output of the webui subprocess.
+
+    Returns
+    -------
+    None
+        This function does not return a value; it prints the webui console.
+    """
+    if config["use_subprocess"]:
+        if webui_process is None:
+            raise NoneProcessError("Could not find subprocess, webui must be running.")
+        else:
+            stdout, stderr = webui_process.communicate()
+            print(stdout.read())
+    else:
+        print("Webui must be running as subprocess to use this function.")
 
 
 def model(name: str, search: bool = True):
