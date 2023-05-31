@@ -129,6 +129,34 @@ def grid_img(imgs: np.ndarray, grid_shape: tuple = None, fill_value: int = 255):
     return dst
 
 
+def slice_imgs(img: np.ndarray, shape: tuple = (512, 512)):
+    """
+    Slice a given image into multiple smaller images of the specified shape.
+
+    Parameters
+    ----------
+    img : numpy.ndarray
+        The input image to be sliced. The shape should be (image height, image width, [number of channels]).
+
+    shape : tuple, optional
+        The desired shape of the smaller sliced images. The default shape is (512, 512).
+
+    Returns
+    -------
+    numpy.ndarray
+        An array containing the sliced images. The shape is (number of sliced images, slice height, slice width, [number of channels]).
+    """
+    img_height, img_width, *img_channels = img.shape
+    h, w = shape
+    y_num, x_num = img_height // h, img_width // w
+    num_imgs = y_num * x_num
+    dsts_shape = (num_imgs, h, w, *img_channels)
+    dsts = np.empty(shape=dsts_shape, dtype=img.dtype)
+    for i, (y, x) in enumerate(np.ndindex(y_num, x_num)):
+        dsts[i] = img[y * h : (y + 1) * h, x * w : (x + 1) * w]
+    return dsts
+
+
 def img2b64str(img: np.ndarray):
     """
     Convert a single image array to base64 string.
