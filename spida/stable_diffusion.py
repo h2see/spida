@@ -102,7 +102,7 @@ def start():
                 config["webui_path"] + "/" + config["webui_startfile"],
                 cwd=config["webui_path"],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
             )
         else:
             cwd = os.getcwd()
@@ -113,7 +113,7 @@ def start():
         webui_started = True
 
 
-def stop(shell=False):
+def stop(shell: bool = False):
     """
     Stops the local API. If not a subprocess, kills all cmd or powershell terminals.
 
@@ -133,6 +133,8 @@ def stop(shell=False):
         else:
             if webui_process.poll() is None:
                 webui_process.terminate()
+                while webui_process.poll() is None:
+                    pass
             else:
                 print("Process is already stopped.")
     else:
@@ -143,25 +145,6 @@ def stop(shell=False):
 
     global webui_started
     webui_started = False
-
-
-def print_webui_console():
-    """
-    Prints the standard output of the webui subprocess.
-
-    Returns
-    -------
-    None
-        This function does not return a value; it prints the webui console.
-    """
-    if config["use_subprocess"]:
-        if webui_process is None:
-            raise NoneProcessError("Could not find subprocess.")
-        else:
-            for line in webui_process.stdout:
-                print(line.decode().strip())
-    else:
-        print("Webui must be running as subprocess to use this function.")
 
 
 def model(name: str, search: bool = True):
