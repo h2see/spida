@@ -34,7 +34,7 @@ def show(
         plt.imshow(img, cmap, vmin=vmin, vmax=vmax)
         plt.show()
     else:
-        Image.fromarray(img, mode="RGB").show()
+        Image.fromarray(np.uint8(img)).show()
 
 
 def save(img: np.ndarray, file_name: str = None):
@@ -57,7 +57,7 @@ def save(img: np.ndarray, file_name: str = None):
             file_name = f"img_{fnum}.png"
         else:
             file_name = "img_0.png"
-    Image.fromarray(img, mode="RGB").save(file_name)
+    Image.fromarray(np.uint8(img)).save(file_name)
 
 
 def open(path: str = None):
@@ -76,7 +76,7 @@ def open(path: str = None):
     """
     if path is None:
         path = filedialog.askopenfilename()
-    return plt.imread(path)
+    return np.asarray(Image.open(path).convert("RGB"))
 
 
 def grid_img(imgs: np.ndarray, grid_shape: tuple = None, fill_value: int = 255):
@@ -144,7 +144,7 @@ def img2b64str(img: np.ndarray):
         The base64 string of the image.
     """
     with io.BytesIO() as output_bytes:
-        Image.fromarray(img, mode="RGB").save(output_bytes, format="PNG")
+        Image.fromarray(np.uint8(img)).save(output_bytes, format="PNG")
         bytes_data = output_bytes.getvalue()
     return base64.b64encode(bytes_data).decode(encoding="utf-8")
 
