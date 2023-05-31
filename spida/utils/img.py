@@ -34,7 +34,7 @@ def show(
         plt.imshow(img, cmap, vmin=vmin, vmax=vmax)
         plt.show()
     else:
-        Image.fromarray(img).show()
+        Image.fromarray(img, mode="RGB").show()
 
 
 def save(img: np.ndarray, file_name: str = None):
@@ -57,7 +57,7 @@ def save(img: np.ndarray, file_name: str = None):
             file_name = f"img_{fnum}.png"
         else:
             file_name = "img_0.png"
-    Image.fromarray(img).save(file_name)
+    Image.fromarray(img, mode="RGB").save(file_name)
 
 
 def open(path: str = None):
@@ -144,7 +144,7 @@ def img2b64str(img: np.ndarray):
         The base64 string of the image.
     """
     with io.BytesIO() as output_bytes:
-        Image.fromarray(img).save(output_bytes, format="PNG")
+        Image.fromarray(img, mode="RGB").save(output_bytes, format="PNG")
         bytes_data = output_bytes.getvalue()
     return base64.b64encode(bytes_data).decode(encoding="utf-8")
 
