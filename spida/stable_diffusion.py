@@ -94,6 +94,7 @@ def start():
     None
         This function does not return a value; it initiates the local API.
     """
+    global webui_started
     if not webui_started:
         if config["use_subprocess"]:
             global webui_process
@@ -109,7 +110,6 @@ def start():
             os.startfile(config["webui_startfile"])
             os.chdir(cwd)
 
-        global webui_started
         webui_started = True
 
 
